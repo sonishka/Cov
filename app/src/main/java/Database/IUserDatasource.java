@@ -20,6 +20,6 @@ public interface IUserDatasource {
 Flowable<List<User>> getAllUsers();
 void insertUser(User... users);
 void UpdateUser(User... users);
-void DeleteUser(User users);
+void DeleteUser(User user);
 void deleteAllUsers();
 }

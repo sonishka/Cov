@@ -1,10 +1,18 @@
 package com.example.lenovo.myapplication;
 
+import android.content.DialogInterface;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -30,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView lstUser ;
     private FloatingActionButton fab;
+
 
     //Adapter
     List<User> userList = new ArrayList<>();
@@ -130,5 +139,186 @@ public class MainActivity extends AppCompatActivity {
         userList.clear();
         userList.addAll(users);
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_clear:
+                deleteAllUsers();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteAllUsers() {
+        Disposable disposable= io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
+
+            @Override
+            public void subscribe(ObservableEmitter<Object> e)throws Exception{
+                userRepository.deleteAllUsers();
+                e.onComplete();
+
+            }
+        })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer() {
+                    @Override
+                    public void accept(Object o) throws Exception {
+
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                },new Action(){
+                    @Override
+                    public void run() throws Exception {
+                        loadData();//refresh data
+                    }
+                });
+        compositeDisposable.add(disposable);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+        menu.setHeaderTitle("Select Actions:");
+
+        menu.add(Menu.NONE,0,Menu.NONE,"UPDATE");
+        menu.add(Menu.NONE,1,Menu.NONE,"DELETE");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+        final User user= userList.get(info.position);
+        switch (item.getItemId())
+        {
+            case 0: // UPDATE
+            {
+                final EditText edtName= new EditText(MainActivity.this);
+                edtName.setText(user.getName());
+                edtName.setHint("Enter your name");
+                new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Edit")
+                .setMessage("Edit user name")
+                .setView(edtName)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (TextUtils.isEmpty(edtName.getText().toString()))
+                            return;
+                        else{
+                            user.setName(edtName.getText().toString());
+                            updateUser(user);
+                        }
+                    }
+                }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                }).create().show();
+            }break;
+            case 1://DELETE
+            {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setMessage("Do you want to delete "+user.toString())
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                               deleteUser(user);
+                            }
+                        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                }).create().show();
+            }
+            break;
+
+        }
+        return true;
+    }
+
+    private void deleteUser(final User user) {
+        Disposable disposable= io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
+
+            @Override
+            public void subscribe(ObservableEmitter<Object> e)throws Exception{
+                userRepository.DeleteUser(user);
+                e.onComplete();
+
+            }
+        })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer() {
+                    @Override
+                    public void accept(Object o) throws Exception {
+
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                },new Action(){
+                    @Override
+                    public void run() throws Exception {
+                        loadData();//refresh data
+                    }
+                });
+        compositeDisposable.add(disposable);
+
+    }
+
+    private void updateUser(final User user) {
+        Disposable disposable= io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
+
+            @Override
+            public void subscribe(ObservableEmitter<Object> e)throws Exception{
+                userRepository.UpdateUser(user);
+                e.onComplete();
+
+            }
+        })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer() {
+                    @Override
+                    public void accept(Object o) throws Exception {
+
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                },new Action(){
+                    @Override
+                    public void run() throws Exception {
+                        loadData();//refresh data
+                    }
+                });
+        compositeDisposable.add(disposable);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
     }
 }

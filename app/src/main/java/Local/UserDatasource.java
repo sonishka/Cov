@@ -50,9 +50,9 @@ public class UserDatasource implements IUserDatasource {
     }
 
     @Override
-    public void DeleteUser(User users) {
+    public void DeleteUser(User user) {
 
-        userDAO.DeleteUser(users);
+        userDAO.DeleteUser(user);
     }
 
     @Override

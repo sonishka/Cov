@@ -49,9 +49,9 @@ public class UserRepository implements IUserDatasource {
     }
 
     @Override
-    public void DeleteUser(User users) {
+    public void DeleteUser(User user) {
 
-        mLocalDataSource.DeleteUser(users);
+        mLocalDataSource.DeleteUser(user);
     }
 
     @Override
