@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -149,6 +150,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+
         switch (item.getItemId()){
             case R.id.menu_clear:
                 deleteAllUsers();
@@ -192,7 +195,9 @@ public class MainActivity extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+
         menu.setHeaderTitle("Select Actions:");
+
 
         menu.add(Menu.NONE,0,Menu.NONE,"UPDATE");
         menu.add(Menu.NONE,1,Menu.NONE,"DELETE");
@@ -202,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
         final User user= userList.get(info.position);
+
         switch (item.getItemId())
         {
             case 0: // UPDATE
@@ -216,6 +222,8 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                       // Log.e(" onContextItemSelected", "MOOOOOOONNN MEEESSSAAAAGGGGEEE");
+
                         if (TextUtils.isEmpty(edtName.getText().toString()))
                             return;
                         else{
@@ -237,11 +245,13 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                            //    Log.e(" onContextItemSelected", "Quelque chose");
                                deleteUser(user);
                             }
                         }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                      //  Log.e(" onContextItemSelected", "Quelque chose");
                         dialogInterface.dismiss();
                     }
                 }).create().show();
