@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import Database.UserRepository;
+import Database.UserRepository2;
 import Local.UserDatabase;
-import Local.UserDatasource;
-import Model.User;
+import Local.UserDatasource2;
+import Model.User2;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -35,46 +35,46 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class MainActivity extends AppCompatActivity {
+public class TestingActivity extends AppCompatActivity {
 
-    private ListView lstUser ;
-    private FloatingActionButton fab;
+    private ListView lstUser2 ;
+    private FloatingActionButton fab2;
 
 
     //Adapter
-    List<User> userList = new ArrayList<>();
+    List<User2> userList2 = new ArrayList<>();
     ArrayAdapter adapter;
 
     //Database
     private CompositeDisposable compositeDisposable;
-    private UserRepository userRepository;
+    private UserRepository2 userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.testing);
 
         //Init
         compositeDisposable= new CompositeDisposable();
 
         //Init View
-        lstUser=(ListView) findViewById(R.id.lstUsers);
-        fab=(FloatingActionButton)findViewById(R.id.fab);
+        lstUser2=(ListView) findViewById(R.id.lstUsers2);
+        fab2=(FloatingActionButton)findViewById(R.id.fab2);
 
-        adapter= new ArrayAdapter(this,android.R.layout.simple_expandable_list_item_1,userList);
-        registerForContextMenu(lstUser);
-        lstUser.setAdapter(adapter);
+        adapter= new ArrayAdapter(this,android.R.layout.simple_expandable_list_item_1,userList2);
+        registerForContextMenu(lstUser2);
+        lstUser2.setAdapter(adapter);
 
         //Database
         UserDatabase userDatabase= UserDatabase.getmInstance(this); //create database
-        userRepository  = UserRepository.getmInstance(UserDatasource.getInstance(userDatabase.userDAO()));
+        userRepository  = UserRepository2.getmInstance(UserDatasource2.getInstance(userDatabase.user2DAO()));
 
 
         //load all data from database
         loadData();
 
         //Event
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //add new user
@@ -83,10 +83,10 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void subscribe(ObservableEmitter<Object> e)throws Exception{
-                        User user = new User("EDMTDev",
+                        User2 user = new User2("EDMTDev",
                                 UUID.randomUUID().toString()+"@gmail.com");
 
-                        userRepository.insertUser(user);
+                        userRepository.insertUser2(user);
                         e.onComplete();
 
                     }
@@ -96,12 +96,12 @@ public class MainActivity extends AppCompatActivity {
                         .subscribe(new Consumer() {
                             @Override
                             public void accept(Object o) throws Exception {
-                                Toast.makeText(MainActivity.this,"User added",Toast.LENGTH_LONG).show();
+                                Toast.makeText(TestingActivity.this,"User added",Toast.LENGTH_LONG).show();
                             }
                         }, new Consumer<Throwable>() {
                             @Override
                             public void accept(Throwable throwable) throws Exception {
-                                Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                                Toast.makeText(TestingActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
                             }
                         });
             }
@@ -111,19 +111,19 @@ public class MainActivity extends AppCompatActivity {
     private void loadData() {
         //User RXJava
 
-        Disposable disposable = userRepository.getAllUsers()
+        Disposable disposable = userRepository.getAllUsers2()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<List<User>>(){
+                .subscribe(new Consumer<List<User2>>(){
                                @Override
-                               public void accept(List<User> users)throws Exception{
+                               public void accept(List<User2> users)throws Exception{
                                    onGetAllUsersSuccess(users);
                                }
                            }, new Consumer<Throwable>(){
                                @Override
                                public void accept(Throwable throwable)throws Exception{
 
-                                   Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                                   Toast.makeText(TestingActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
                                }
                            },new Action(){
                                @Override
@@ -136,9 +136,9 @@ public class MainActivity extends AppCompatActivity {
         compositeDisposable.add(disposable);
     }
 
-    private void onGetAllUsersSuccess(List<User> users) {
-        userList.clear();
-        userList.addAll(users);
+    private void onGetAllUsersSuccess(List<User2> users) {
+        userList2.clear();
+        userList2.addAll(users);
         adapter.notifyDataSetChanged();
     }
 
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void subscribe(ObservableEmitter<Object> e)throws Exception{
-                userRepository.deleteAllUsers();
+                userRepository.deleteAllUsers2();
                 e.onComplete();
 
             }
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                        Toast.makeText(TestingActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
                     }
                 },new Action(){
                     @Override
@@ -206,32 +206,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-        final User user= userList.get(info.position);
+        final User2 user= userList2.get(info.position);
 
         switch (item.getItemId())
         {
             case 0: // UPDATE
             {
-                final EditText edtName= new EditText(MainActivity.this);
-                edtName.setText(user.getName());
+                final EditText edtName= new EditText(TestingActivity.this);
+                edtName.setText(user.getNom());
                 edtName.setHint("Enter your name");
-                new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Edit")
-                .setMessage("Edit user name")
-                .setView(edtName)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                       // Log.e(" onContextItemSelected", "MOOOOOOONNN MEEESSSAAAAGGGGEEE");
+                new AlertDialog.Builder(TestingActivity.this)
+                        .setTitle("Edit")
+                        .setMessage("Edit user name")
+                        .setView(edtName)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // Log.e(" onContextItemSelected", "MOOOOOOONNN MEEESSSAAAAGGGGEEE");
 
-                        if (TextUtils.isEmpty(edtName.getText().toString()))
-                            return;
-                        else{
-                            user.setName(edtName.getText().toString());
-                            updateUser(user);
-                        }
-                    }
-                }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                if (TextUtils.isEmpty(edtName.getText().toString()))
+                                    return;
+                                else{
+                                    user.setNom(edtName.getText().toString());
+                                    updateUser(user);
+                                }
+                            }
+                        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
@@ -240,18 +240,18 @@ public class MainActivity extends AppCompatActivity {
             }break;
             case 1://DELETE
             {
-                new AlertDialog.Builder(MainActivity.this)
+                new AlertDialog.Builder(TestingActivity.this)
                         .setMessage("Do you want to delete "+user.toString())
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                            //    Log.e(" onContextItemSelected", "Quelque chose");
-                               deleteUser(user);
+                                //    Log.e(" onContextItemSelected", "Quelque chose");
+                                deleteUser(user);
                             }
                         }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                      //  Log.e(" onContextItemSelected", "Quelque chose");
+                        //  Log.e(" onContextItemSelected", "Quelque chose");
                         dialogInterface.dismiss();
                     }
                 }).create().show();
@@ -262,12 +262,12 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void deleteUser(final User user) {
+    private void deleteUser(final User2 user) {
         Disposable disposable= io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
 
             @Override
             public void subscribe(ObservableEmitter<Object> e)throws Exception{
-                userRepository.DeleteUser(user);
+                userRepository.DeleteUser2(user);
                 e.onComplete();
 
             }
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                        Toast.makeText(TestingActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
                     }
                 },new Action(){
                     @Override
@@ -294,12 +294,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateUser(final User user) {
+    private void updateUser(final User2 user) {
         Disposable disposable= io.reactivex.Observable.create(new ObservableOnSubscribe<Object>() {
 
             @Override
             public void subscribe(ObservableEmitter<Object> e)throws Exception{
-                userRepository.UpdateUser(user);
+                userRepository.UpdateUser2(user);
                 e.onComplete();
 
             }
@@ -314,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Toast.makeText(MainActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
+                        Toast.makeText(TestingActivity.this,""+throwable.getMessage(),Toast.LENGTH_LONG).show();
                     }
                 },new Action(){
                     @Override
@@ -326,9 +326,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-  /*  @Override
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         compositeDisposable.clear();
-    }*/
+    }
 }
