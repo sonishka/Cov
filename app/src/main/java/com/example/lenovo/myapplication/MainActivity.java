@@ -326,9 +326,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-  /*  @Override
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         compositeDisposable.clear();
-    }*/
+    }
 }
